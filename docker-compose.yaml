@@ -1,0 +1,79 @@
+version: '3.9'
+services:
+  mediscreen-rapport:
+    container_name: mediscreen-rapport
+    build: mediscreen-rapport
+    ports:
+      - 9090:9090
+    networks:
+      - service-mysql
+      
+  mongodb:
+    image: mongo:5.0.2 
+    container_name: mediscreen-mongo
+    environment:
+      - MONGO_INITDB_DATABASE=mediscreen
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes: 
+      - ./mongo-volume:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - service-mysql
+
+  mediscreen-note: 
+    container_name: mediscreen-note
+    build: mediscreen-note
+    environment: 
+      - SPRING_DATA_MONGODB_HOST=mongodb
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=mediscreen
+      - SPRING_DATA_MONGODB_USERNAME=admin
+      - SPRING_DATA_MONGODB_PASSWORD=admin
+    ports: 
+      - 8080:8080
+    links:
+      - mongodb
+    
+    networks:
+      - service-mysql
+      
+  mediscreen-angular:
+    container_name: mediscreen-front
+    build: mediscreen-angular
+    ports: 
+      - 4200:80
+
+  patientdb:
+    container_name: mediscreen-patient-mysql
+    image: mediscreen-mysql
+    build: mediscreen-mysql
+    networks:
+      - service-mysql
+    volumes:
+      - ./mediscreen-mysql/01.sql:/docker-entrypoint-initdb.d/01.sql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=mediscreen
+    ports:
+      - 3307:3306
+
+  mediscreen-patient:
+    depends_on:
+      - patientdb
+    networks:
+      - service-mysql
+    container_name: mediscreen-patient 
+    build: mediscreen-patient
+    ports:
+      - 8282:8282
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://patientdb:3306/mediscreen?enabledTLSProtocols=TLSv1.2&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+networks:
+  service-mysql:
+
