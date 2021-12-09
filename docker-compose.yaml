@@ -79,4 +79,3 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
 networks:
   service-mysql:
-
