@@ -1,5 +1,6 @@
 version: '3.9'
 services:
+
   mediscreen-rapport:
     container_name: mediscreen-rapport
     build: mediscreen-rapport
@@ -8,19 +9,7 @@ services:
     networks:
       - service-mysql
       
-  mongodb:
-    image: mongo:5.0.2 
-    container_name: mediscreen-mongo
-    environment:
-      - MONGO_INITDB_DATABASE=mediscreen
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin
-    volumes: 
-      - ./mongo-volume:/data/db
-    ports:
-      - 27017:27017
-    networks:
-      - service-mysql
+
 
   mediscreen-note: 
     container_name: mediscreen-note
@@ -29,8 +18,8 @@ services:
       - SPRING_DATA_MONGODB_HOST=mongodb
       - SPRING_DATA_MONGODB_PORT=27017
       - SPRING_DATA_MONGODB_DATABASE=mediscreen
-      - SPRING_DATA_MONGODB_USERNAME=admin
-      - SPRING_DATA_MONGODB_PASSWORD=admin
+      # - SPRING_DATA_MONGODB_USERNAME=admin
+      # - SPRING_DATA_MONGODB_PASSWORD=admin
     ports: 
       - 8080:8080
     links:
@@ -38,7 +27,21 @@ services:
     
     networks:
       - service-mysql
-      
+
+  mongodb:
+    image: mongo:5.0.2
+    container_name: mediscreen-mongo
+    environment:
+      - MONGO_INITDB_DATABASE=mediscreen
+      # - MONGO_INITDB_ROOT_USERNAME=admin
+      # - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - ./mongo-volume:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - service-mysql
+
   mediscreen-angular:
     container_name: mediscreen-front
     build: mediscreen-angular
